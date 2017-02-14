@@ -6,3 +6,6 @@ It's just a very raw version which hasn't fiinished. You can just play 1 phase a
 
 ## notice
 More version will come soon!
+
+## notice
+Linux-version only!
