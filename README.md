@@ -2,7 +2,7 @@
 a card game
 
 ## notice
-</br>It's just a very raw version which hasn't fiinished. You can just play 1 phase and only with 2 person on 1 computer!!!
+It's just a very raw version which hasn't fiinished. You can just play 1 phase and only with 2 person on 1 computer!!!
 </br>More version will come soon!
 </br>Linux-version only!
 
