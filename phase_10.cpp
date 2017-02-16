@@ -5,26 +5,24 @@ using namespace std;
 
 bool isout[109] = {};
 
-int confirmer = 0;
 int shown = 0;
 int not_shown = 0;
+int total_player = 0;
 
-string player1_enter;
-string player2_enter;
+// structures
 
 struct player_data
 {
-    int player1[13];
-    int player2[13];
-    bool player1_isphased[13];
-    bool player2_isphased[13];
-    int player1_score;
-    int player2_score;
-    int player1_phase;
-    int player2_phase;
-    string player1_word;
-    string player2_word;
+    bool isskipped;
+    int player_card[13];
+    bool player_isphased[13];
+    int player_score;
+    int player_phase;
+    string player_word;
+    string player_password;
+    string player_enter;
 };
+player_data player[11];
 
 struct phase_data
 {
@@ -36,61 +34,62 @@ struct phase_data
     bool issamecolor;
 };
 
-void initialize();
+phase_data phase1[21];
 
-void transfer(int card_number);
+
+// functions
+
+void initialize(int total_player);
 
 int card_out();
 
-int check_set(int *arr, int total);
+bool isnotclear();
+
+void round(int player_number);
+
+void show_card(int player_number);
 
 bool cmp(int a, int b);
 
-bool isclear(int *arr, int start, int stop);
+void transfer(int card_number);
+
+void pick_card(int choice, int player_number);
+
+int phase_1(int player_number);
+
+int discard_card(bool discard_module, int player_number);
 
 int get_number(string enter);
 
-int search_card_number(int *arr, int start, int stop, int card_number);
+int search_card_number(int start, int stop, int card_number, int player_number);
 
-int search_card_order(int *arr, int start, int stop, int card_number);
+int search_card_order(int start, int stop, int card_number, int player_number);
+
+int skip_person(int player_number);
+
+int check_set(int *arr, int total);
 
 void show_phase_1();
+
+int hit_phase(int player_number);
 
 int search_phase(int num);
 
 int calculate_score(int *arr, int total);
 
-void round_p1();
-void round_p2();
-
-void show_card_p1();
-void show_card_p2();
-
-void pick_card_p1(int choice);
-void pick_card_p2(int choice);
-
-int discard_card_p1(bool discard_module);
-int discard_card_p2(bool discard_module);
-
-int phase_1_p1();
-int phase_1_p2();
-
-int hit_phase_p1();
-int hit_phase_p2();
-
-player_data player;
-phase_data phase1[5];
-
 int main()
 {
-    initialize();
+    cout<<"Enter the players: ";
+    cin>>total_player;
+    cin.get();
+    initialize(total_player);
 
     cout<<"The game is ready to start.\n";
     system("sleep 2");
     system("clear");
 
     srand(time(0));
-    int start_from = 1;//rand() % 2;
+    int start_from = rand() % total_player + 1;
     int start_card = card_out();
     int random_card = card_out();
     int discard_card = 0;
@@ -99,47 +98,24 @@ int main()
     shown = start_card;
     not_shown = random_card;
 
-    bool player1_isskipped = false;
-    bool player2_isskipped = false;
-    while ((!isclear(player.player1, 1, 11)) && (!isclear(player.player2, 1, 11)))
+    while (isnotclear())
     {
-        if (start_from % 2 != 0)
+        if (!player[start_from].isskipped)
         {
-            if ((shown <= 104) || (player1_isskipped))
-            {
-                round_p1();
-                player1_isskipped = false;
-            }
-            else
-            {
-                cout<<"You are skipped this round.\n";
-                player1_isskipped = true;
-            }
-            start_from++;
-            cout<<"Get ready for your opponent's round.\n";
-            system("sleep 5");
-            system("clear");
-            // return 0;
+            round((start_from - 1) % total_player + 1);
         }
         else
         {
-            if ((shown <= 104) || (player2_isskipped))
-            {
-                round_p2();
-                player2_isskipped = false;
-            }
-            else
-            {
-                cout<<"You are skipped this round.\n";
-                player2_isskipped = true;
-            }
-            start_from++;
-            cout<<"Get ready for your opponent's round.\n";
-            system("sleep 5");
-            system("clear");
+            cout<<"You are skipped this round.\n";
+            player[start_from].isskipped = false;
         }
+        start_from++;
+        cout<<"Get ready for your opponent's round.\n";
+        system("sleep 2");
+        system("clear");
     }
 
+    /*
     // calculate scores
     if (isclear(player.player1, 1, 11))
         player.player2_score += calculate_score(player.player2, 11);
@@ -152,68 +128,238 @@ int main()
     cout<<"Player1 "<<player.player1_score<<endl;
     cout<<"Player2 "<<player.player2_score<<endl;
     system("sleep 1");
-    cout<<"Get ready for next hand.\n";
+    cout<<"Get ready for next hand.\n";*/
 
     return 0;
 }
 
-
-
-bool isclear(int *arr, int start, int stop)
-{
-    for (int i = start; i <= stop; i++)
-        if (*(arr + i) != 0)
-            return false;
-    return true;
-}
-
-void initialize()
+void initialize(int total_player)
 {
     system("clear");
 
     // initialize player
     for (int i = 1; i <= 10; i++)
-        player.player1[i] = 0;
-    for (int i = 1; i <= 10; i++)
-        player.player2[i] = 0;
+        for (int j = 1; j <= 11; j++)
+            player[i].player_card[j] = 0;
 
     // initialize card_numbers
     srand(time(0));
-    int counter = 1;
-    while (counter <= 20)
+    for (int i = 1; i <= total_player; i++)
+        for (int j = 1; j <= 10; j++)
+            player[i].player_card[j] = card_out();
+
+    // initialize phase status
+    for (int i = 1; i <= 10; i++)
+        for (int j = 1; j <= 11; j++)
+            player[i].player_isphased[j] = false;
+
+    // initialize player phase status
+    for (int i = 1; i <= 10; i++)
+        player[i].player_phase = 0;
+
+    // initialize skip status
+    for (int i = 1; i <= 10; i++)
+        player[i].isskipped = false;
+
+    // enter password
+    for (int i = 1; i <= total_player; i++)
     {
-        int card_number = rand() % 108 + 1;
-        if (!isout[card_number])
-        {
-            if (counter % 2 != 0)
-                player.player1[(counter + 1) / 2] = card_number;
+        cout<<"Player "<<i<<", please enter your password: ";
+        getline(cin,player[i].player_password);
+        system("clear");
+    }
+
+    return;
+}
+
+int card_out()
+{
+    int card_number = 108;
+    srand(time(0));
+    int start_card = rand() % card_number + 1;
+    if (isout[start_card])
+        while (isout[start_card])
+            start_card = rand() % card_number + 1;
+    isout[start_card] = true;
+    return start_card;
+}
+
+bool isnotclear()
+{
+    bool check = false;
+    for (int i = 1; i <= 10; i++)
+    {
+        for (int j = 1; j <= 11; j++)
+            if (player[i].player_card[j] != 0)
+            {
+                check = false;
+                continue;
+            }
             else
-                player.player2[counter / 2] = card_number;
-            counter++;
-            isout[card_number] = true;
+                check = true;
+        if (check)
+            return true;
+    }
+    return false;
+}
+
+void round(int player_number)
+{
+    //cout<<player_number<<endl<<endl;
+    cout<<"Player"<<player_number<<", enter your password: ";
+    getline(cin, player[player_number].player_enter);
+
+    while (player[player_number].player_enter != player[player_number].player_password)
+    {
+        cout<<"Wrong password! Please reenter!\n";
+        getline(cin, player[player_number].player_enter);
+    }
+
+    show_card(player_number);
+    cout<<endl;
+
+    cout<<"The shown card is: ";
+    transfer(shown);
+    cout<<"And there is a random card which can't be shown.\n\n";
+
+    if (shown <= 104)
+    {
+        cout<<"Pick one, enter 1 for the shown card, 2 for the random one.\n";
+        int confirmer = 0;
+        while ((!(cin>>confirmer)) || ((confirmer != 1) && (confirmer != 2)))
+        {
+            cin.clear();
+            while (cin.get() != '\n')
+                continue;
+            cout<<"Wrong syntax! Please reenter: ";
+        }
+        pick_card(confirmer, player_number);
+        if (confirmer == 2)
+            not_shown = card_out();
+    }
+    else
+    {
+        cout<<"You can't pick Skip Card.\nAutomatically take the random card instead.\n";
+        pick_card(2, player_number);
+        not_shown = card_out();
+    }
+
+    // phase
+    if (player[player_number].player_phase != 1)
+    {
+        system("sleep 1");
+        system("clear");
+        show_card(player_number);
+        cout<<"Do you have a phase? Enter \"yes(y)\" to confirm.\n";
+        string confirmer_phase = "";
+        while (confirmer_phase == "")
+            getline(cin, confirmer_phase);
+        if ((confirmer_phase == "y") || (confirmer_phase == "yes"))
+        {
+            player[player_number].player_phase = phase_1(player_number);
+            while (player[player_number].player_phase == -1)
+                player[player_number].player_phase = phase_1(player_number);
         }
     }
 
-    // initialize phase status
-    for (int i = 1; i <= 11; i++)
+    // hit
+    if (player[player_number].player_phase == 1)
     {
-        player.player1_isphased[i] = false;
-        player.player2_isphased[i] = false;
+        system("sleep 1");
+        system("clear");
+        show_card(player_number);
+        cout<<"You have phased! Do you have cards to hit the phases?\nEnter \"yes(y)\" to confirm.\n";
+        cout<<"By the way, the phases on the desk are:\n";
+        show_phase_1();
+        cout<<endl;
+        string confirmer_hit = "";
+        while (confirmer_hit == "")
+            getline(cin, confirmer_hit);
+        if ((confirmer_hit == "y") || (confirmer_hit == "yes"))
+        {
+            cout<<"Enter the card you want to hit: ";
+            int copyhit = hit_phase(player_number);
+            while (copyhit == -1)
+                copyhit = hit_phase(player_number);
+        }
     }
 
-    // initialize player phase status
-    player.player1_phase = 0;
-    player.player2_phase = 0;
+    // discard
+    system("sleep 1");
+    system("clear");
+    show_card(player_number);
+    cout<<"Enter a card you want to discard: ";
+    int copyshown = discard_card(1, player_number);
+    while (copyshown == -1)
+        copyshown = discard_card(1, player_number);
+    shown = copyshown;
 
-    // enter password
-    cout<<"Player 1, please enter your password: ";
-    getline(cin,player.player1_word);
-    system("clear");
-    cout<<"Player 2, please enter your password: ";
-    getline(cin,player.player2_word);
-    system("clear");
+    if ((shown >= 105) && (shown <= 108) && (total_player > 2))
+    {
+        cout<<"You can only skip one person. Choose one: ";
+        int choice = skip_person(player_number);
+        while (choice == -1)
+            choice = skip_person(player_number);
+        player[choice].isskipped = true;
+    }
+    else if ((total_player == 2) && (player[player_number % 2 + 1].isskipped))
+        player[player_number % 2 + 1].isskipped = true;
+
+    system("sleep 2");
 
     return;
+}
+
+int skip_person(int player_number)
+{
+    int choice = 0;
+    if (!(cin>>choice))
+    {
+        cin.clear();
+        while (cin.get() != '\n')
+            continue;
+        cout<<"Wrong syntax! Please reenter: ";
+        return -1;
+    }
+    else if ((choice <= 0) || (choice > total_player))
+    {
+        cout<<"Out of range! Please reenter: ";
+        return -1;
+    }
+    else if (choice == player_number)
+    {
+        cout<<"Don't be ridiculous! You can't skip yourself! Please reenter: ";
+        return -1;
+    }
+    else if (player[choice].isskipped)
+    {
+        cout<<"You can't skip whoever is skipped the last round! Please reenter: ";
+        return -1;
+    }
+    else
+        return choice;
+}
+
+void show_card(int player_number)
+{
+    system("clear");
+    cout<<"You own:\n";
+    sort(player[player_number].player_card + 1, player[player_number].player_card + 11 + 1, cmp);
+    for (int i = 1; i <= 11; i++)
+        if (player[player_number].player_card[i] != 0)
+        {
+            transfer(player[player_number].player_card[i]);
+            cout<<"Card No."<<player[player_number].player_card[i]<<"\n\n";
+        }
+    return;
+}
+
+bool cmp(int a, int b)
+{
+    if ((a <= 96) && (b <= 96) && ((a - 1) / 2 % 12 + 1 != (b - 1) / 2 % 12 + 1))
+        return ((a - 1) / 2 % 12 + 1 < (b - 1) / 2 % 12 + 1);
+    else
+        return (a < b);
 }
 
 void transfer(int card_number)
@@ -243,23 +389,202 @@ void transfer(int card_number)
     return;
 }
 
-bool cmp(int a, int b)
+void pick_card(int choice, int player_number)
 {
-    if ((a <= 96) && (b <= 96) && ((a - 1) / 2 % 12 + 1 != (b - 1) / 2 % 12 + 1))
-        return ((a - 1) / 2 % 12 + 1 < (b - 1) / 2 % 12 + 1);
-    else
-        return (a < b);
+    if (choice == 1)
+    {
+        player[player_number].player_card[1] = shown;
+        show_card(player_number);
+    }
+    else if (choice == 2)
+    {
+        cout<<"You get a ";
+        transfer(not_shown);
+        system("sleep 3");
+        player[player_number].player_card[1] = not_shown;
+        show_card(player_number);
+    }
+    return;
 }
 
-int card_out()
+int phase_1(int player_number)
 {
-    srand(time(0));
-    int start_card = rand() % 108 + 1;
-    if (isout[start_card])
-        while (isout[start_card])
-            start_card = rand() % 108 + 1;
-    isout[start_card] = true;
-    return start_card;
+    int pool[4] = {};
+
+    for (int i = 1; i <= 11; i++)
+        player[player_number].player_isphased[i] = false;
+
+    for (int i = 1; i <= 2 * total_player; i++)
+    {
+        phase1[i].isset = true;
+        phase1[i].isrun = false;
+    }
+
+    cout<<"\nPhase 1: 2 sets of 3.\nEnter the first set of 3.\n";
+    // part 1
+    for (int i = 1; i <= 3; i++)
+    {
+        cout<<"Card "<<i<<": ";
+        pool[i] = discard_card(0, player_number);
+        if ((pool[i] >= 105) || (player[player_number].player_isphased[search_card_order(pool[i], pool[i], 11, player_number)]) || (pool[i] == -1))
+            return -1;
+        player[player_number].player_isphased[search_card_order(pool[i], pool[i], 11, player_number)] = true;
+        if ((pool[i] <= 96) && (pool[i] % 2 != 0))
+            pool[i]++;
+    }
+
+    cout<<"Checking the validity of the cards...\nPlease wait...\n";
+    int copyset_num = check_set(pool, 3);
+    if (copyset_num > 0)
+    {
+        cout<<"Correct! Enter the next set of 3.\n";
+        phase1[2 * player_number - 1].set_num = copyset_num;
+    }
+    else
+    {
+        cout<<"Wrong phase! Please reenter the whole phase!\n";
+        for (int i = 1; i <= 3; i++)
+            pool[i] = 0;
+        for (int i = 1; i <= 11; i++)
+            player[player_number].player_isphased[i] = false;
+        return -1;
+    }
+
+    // part 2
+    for (int i = 1; i <= 3; i++)
+    {
+        cout<<"Card "<<i<<": ";
+        pool[i] = discard_card(0, player_number);
+        if ((pool[i] >= 105) || (player[player_number].player_isphased[search_card_order(pool[i], pool[i], 11, player_number)]) || (pool[i] == -1))
+            return -1;
+        player[player_number].player_isphased[search_card_order(pool[i], pool[i], 11, player_number)] = true;
+        if ((pool[i] <= 96) && (pool[i] % 2 != 0))
+            pool[i]++;
+    }
+
+    cout<<"Checking the validity of the cards...\nPlease wait...\n";
+    copyset_num = check_set(pool, 3);
+    if (copyset_num > 0)
+    {
+        cout<<"Congratulations! You phase the card!\n";
+        phase1[2 * player_number].set_num =copyset_num;
+    }
+    else
+    {
+        cout<<"Wrong phase! Please reenter the whole phase!\n";
+        for (int i = 1; i <= 3; i++)
+            pool[i] = 0;
+        for (int i = 1; i <= 11; i++)
+            player[player_number].player_isphased[i] = false;
+        return -1;
+    }
+
+    // clear the cards
+    for (int i = 1; i <= 11; i++)
+    {
+        if (player[player_number].player_isphased[i])
+            player[player_number].player_card[i] = 0;
+        player[player_number].player_isphased[i] = false; // reset phase status
+    }
+
+    system("sleep 2");
+    show_phase_1();
+    cout<<endl;
+
+    // reshow the cards
+    show_card(player_number);
+
+    return 1;
+}
+
+int discard_card(bool discard_module, int player_number)
+{
+    string card_enter = "";
+    int card_number = 0;
+    int card_order = 0;
+
+    if ((get_number(card_enter) == -1) && (card_enter != ""))
+        return -1;
+
+    while (card_enter == "")
+        getline(cin, card_enter);
+    int card_range = 0;
+    card_range = get_number(card_enter);
+
+    if ((card_range > 0) && (card_range <= 96))
+    {
+        card_number = search_card_number(card_range - 1, card_range, 11, player_number);
+        card_order = search_card_order(card_range - 1, card_range, 11, player_number);
+        if (card_number != 0)
+        {
+            if (discard_module)
+            {
+                cout<<"You discard a ";
+                transfer(card_number);
+                player[player_number].player_card[card_order] = 0;
+                system("sleep 2.0");
+                show_card(player_number);
+            }
+            return card_number;
+        }
+        else
+        {
+            cout<<"You don't have a ";
+            transfer(card_range);
+            cout<<"Please reenter: ";
+            return -1;
+        }
+    }
+    else if ((card_range >= 97) && (card_range <= 104))
+    {
+        card_number = search_card_number(card_range, card_range + 7, 11, player_number);
+        card_order = search_card_order(card_range, card_range + 7, 11, player_number);
+        if (card_number != 0)
+        {
+            if (discard_module)
+            {
+                cout<<"You discard a ";
+                transfer(card_number);
+                player[player_number].player_card[card_order] = 0;
+                system("sleep 2.0");
+                show_card(player_number);
+            }
+            return card_number;
+        }
+        else
+        {
+            cout<<"You don't have a ";
+            transfer(card_range);
+            cout<<"Please reenter: ";
+            return -1;
+        }
+    }
+    else if ((card_range >= 105) && (card_range <= 108))
+    {
+        card_number = search_card_number(card_range, card_range + 3, 11, player_number);
+        card_order = search_card_order(card_range, card_range + 3, 11, player_number);
+        if (card_number != 0)
+        {
+            if (discard_module)
+            {
+                cout<<"You discard a ";
+                transfer(card_number);
+                player[player_number].player_card[card_order] = 0;
+                system("sleep 2.0");
+                show_card(player_number);
+            }
+            return card_number;
+        }
+        else
+        {
+            cout<<"You don't have a ";
+            transfer(card_range);
+            cout<<"Please reenter: ";
+            return -1;
+        }
+    }
+    else
+        return -1;
 }
 
 int get_number(string enter)
@@ -371,20 +696,20 @@ int get_number(string enter)
         return -1;
 }
 
-int search_card_number(int *arr, int start, int stop, int card_number)
+int search_card_number(int start, int stop, int card_number, int player_number)
 {
     for (int i = 1; i <= card_number; i++)
         for (int j = start; j <= stop; j++)
-            if ((*(arr + i) == j) && (!player.player1_isphased[i]))
+            if ((player[player_number].player_card[i] == j) && (!player[player_number].player_isphased[i]))
                 return j;
     return 0;
 }
 
-int search_card_order(int *arr, int start, int stop, int card_number)
+int search_card_order(int start, int stop, int card_number, int player_number)
 {
     for (int i = 1; i <= card_number; i++)
         for (int j = start; j <= stop; j++)
-            if ((*(arr + i) == j) && (!player.player1_isphased[i]))
+            if ((player[player_number].player_card[i] == j) && (!player[player_number].player_isphased[i]))
                 return i;
     return 0;
 }
@@ -414,710 +739,62 @@ int check_set(int *arr, int total)
     return *(arr + counter);
 }
 
+void show_phase_1()
+{
+    for (int i = 1; i <= 2 * total_player; i++)
+        if (phase1[i].set_num != 0)
+            cout<<"A set of "<<phase1[i].set_num<<endl;
+    return;
+}
+
+int hit_phase(int player_number)
+{
+    int hit_seq = 0;
+    int hit = discard_card(0, player_number);
+    if (hit == -1)
+        return -1;
+    if (hit <= 96)
+        hit_seq = ((hit - 1) % 24 / 2 + 1);
+    else if (hit >= 105)
+        hit_seq = 14;
+    else
+        hit_seq = 13;
+    int counter = search_phase(hit_seq);
+    if (counter == 0)
+    {
+        cout<<"Phase to hit not found! Please reenter:\n";
+        return -1;
+    }
+    else
+    {
+        player[player_number].player_card[search_card_order(hit, hit, 11, player_number)] = 0;
+        show_card(player_number);
+        cout<<"Do you have other cards to hit? Enter \"yes(y)\" to confirm.\n";
+        string confirmer_hit = "";
+        while (confirmer_hit == "")
+            getline(cin, confirmer_hit);
+        if ((confirmer_hit == "y") || (confirmer_hit == "yes"))
+        {
+            cout<<"Please enter the card you want to hit: ";
+            return -1;
+        }
+
+        else return 0;
+    }
+}
+
 int search_phase(int num)
 {
     // can extend here, but finish first...
     int counter = 0;
-    for (int i = 1; i <= 4; i++)
+    for (int i = 1; i <= 2 * total_player; i++)
     {
         if (phase1[i].isset)
         {
             if ((num == phase1[i].set_num) || (num == 13))
                 counter++;
         }
-        cout<<counter<<endl;
+        //cout<<counter<<endl;
     }
     return counter;
-}
-
-int calculate_score(int *arr, int total)
-{
-    int score = 0;
-    for (int i = 1; i <= 11; i++)
-    {
-        if ((*(arr + i) <= 96) && (*(arr + i) > 0))
-        {
-            if (*(arr + i - 1) % 24 / 2 + 1 <= 9)
-                score += 5;
-            else
-                score += 10;
-        }
-        else if (*(arr + i) >= 105)
-            score += 15;
-        else
-            score += 25;
-    }
-    return score;
-}
-
-void show_phase_1()
-{
-    for (int i = 1; i <= 4; i++)
-        if (phase1[i].set_num != 0)
-            cout<<"A set of "<<phase1[i].set_num<<endl;
-    return;
-}
-
-void round_p1()
-{
-    cout<<"Player1, enter your password: ";
-    getline(cin, player1_enter);
-
-    while (player1_enter != player.player1_word)
-    {
-        cout<<"Wrong password! Please reenter!\n";
-        getline(cin, player1_enter);
-    }
-
-    show_card_p1();
-    cout<<endl;
-
-    cout<<"The shown card is: ";
-    transfer(shown);
-    cout<<"And there is a random card which can't be shown.\n\n";
-
-    if (shown <= 104)
-    {
-        cout<<"Pick one, enter 1 for the shown card, 2 for the random one.\n";
-        cin>>confirmer;
-        pick_card_p1(confirmer);
-        if (confirmer == 2)
-            not_shown = card_out();
-    }
-    else
-    {
-        cout<<"You can't pick Skip Card.\nAutomatically take the random card instead.\n";
-        pick_card_p1(2);
-        not_shown = card_out();
-    }
-
-    // phase
-    if (player.player1_phase != 1)
-    {
-        system("sleep 1");
-        system("clear");
-        show_card_p1();
-        cout<<"Do you have a phase? Enter \"yes(y)\" to confirm.\n";
-        string confirmer_phase = "";
-        while (confirmer_phase == "")
-            getline(cin, confirmer_phase);
-        if ((confirmer_phase == "y") || (confirmer_phase == "yes"))
-        {
-            player.player1_phase = phase_1_p1();
-            while (player.player1_phase == -1)
-                player.player1_phase = phase_1_p1();
-        }
-    }
-
-    // hit
-    if (player.player1_phase == 1)
-    {
-        system("sleep 1");
-        system("clear");
-        show_card_p1();
-        cout<<"You have phased! Do you have cards to hit the phases?\nEnter \"yes(y)\" to confirm.\n";
-        cout<<"By the way, the phases on the desk are:\n";
-        show_phase_1();
-        cout<<endl;
-        string confirmer_hit = "";
-        while (confirmer_hit == "")
-            getline(cin, confirmer_hit);
-        if ((confirmer_hit == "y") || (confirmer_hit == "yes"))
-        {
-            cout<<"Enter the card you want to hit: ";
-            int copyhit = hit_phase_p1();
-            while (copyhit == -1)
-                copyhit = hit_phase_p1();
-        }
-    }
-
-    // discard
-    system("sleep 1");
-    system("clear");
-    show_card_p1();
-    cout<<"Enter a card you want to discard: ";
-    int copyshown = discard_card_p1(1);
-    while (copyshown == -1)
-        copyshown = discard_card_p1(1);
-    shown = copyshown;
-    system("sleep 2");
-
-    return;
-}
-
-void show_card_p1()
-{
-    system("clear");
-    cout<<"You own:\n";
-    sort(player.player1 + 1, player.player1 + 11 + 1, cmp);
-    for (int i = 1; i <= 11; i++)
-        if (player.player1[i] != 0)
-        {
-            transfer(player.player1[i]);
-            cout<<"Card No."<<player.player1[i]<<"\n\n";
-        }
-    return;
-}
-
-void pick_card_p1(int choice)
-{
-    if (choice == 1)
-    {
-        player.player1[1] = shown;
-        show_card_p1();
-    }
-    else if (choice == 2)
-    {
-        cout<<"You get a ";
-        transfer(not_shown);
-        system("sleep 2");
-        player.player1[1] = not_shown;
-        show_card_p1();
-    }
-    return;
-}
-
-int discard_card_p1(bool discard_module)
-{
-    string p1_enter = "";
-    int card_number = 0;
-    int card_order = 0;
-
-    if ((get_number(p1_enter) == -1) && (p1_enter != ""))
-        return -1;
-
-    while (p1_enter == "")
-        getline(cin, p1_enter);
-    int card_range = 0;
-    card_range = get_number(p1_enter);
-
-    if ((card_range > 0) && (card_range <= 96))
-    {
-        card_number = search_card_number(player.player1, card_range - 1, card_range, 11);
-        card_order = search_card_order(player.player1, card_range - 1, card_range, 11);
-        if (card_number != 0)
-        {
-            if (discard_module)
-            {
-                cout<<"You discard a ";
-                transfer(card_number);
-                player.player1[card_order] = 0;
-                system("sleep 2.0");
-                show_card_p1();
-            }
-            return card_number;
-        }
-        else
-        {
-            cout<<"You don't have a ";
-            transfer(card_range);
-            cout<<"Please reenter: ";
-            return -1;
-        }
-    }
-    else if ((card_range >= 97) && (card_range <= 104))
-    {
-        card_number = search_card_number(player.player1, card_range, card_range + 7, 11);
-        card_order = search_card_order(player.player1, card_range, card_range + 7, 11);
-        if (card_number != 0)
-        {
-            if (discard_module)
-            {
-                cout<<"You discard a ";
-                transfer(card_number);
-                player.player1[card_order] = 0;
-                system("sleep 2.0");
-                show_card_p1();
-            }
-            return card_number;
-        }
-        else
-        {
-            cout<<"You don't have a ";
-            transfer(card_range);
-            cout<<"Please reenter: ";
-            return -1;
-        }
-    }
-    else if ((card_range >= 105) && (card_range <= 108))
-    {
-        card_number = search_card_number(player.player1, card_range, card_range + 3, 11);
-        card_order = search_card_order(player.player1, card_range, card_range + 3, 11);
-        if (card_number != 0)
-        {
-            if (discard_module)
-            {
-                cout<<"You discard a ";
-                transfer(card_number);
-                player.player1[card_order] = 0;
-                system("sleep 2.0");
-                show_card_p1();
-            }
-            return card_number;
-        }
-        else
-        {
-            cout<<"You don't have a ";
-            transfer(card_range);
-            cout<<"Please reenter: ";
-            return -1;
-        }
-    }
-    else
-        return -1;
-}
-
-int phase_1_p1()
-{
-    int pool[4] = {};
-
-    for (int i = 1; i <= 11; i++)
-        player.player1_isphased[i] = false;
-
-    for (int i = 1; i <=4; i++)
-    {
-        phase1[i].isset = true;
-        phase1[i].isrun = false;
-    }
-
-    cout<<"\nPhase 1: 2 sets of 3.\nEnter the first set of 3.\n";
-    // part 1
-    for (int i = 1; i <= 3; i++)
-    {
-        cout<<"Card "<<i<<": ";
-        pool[i] = discard_card_p1(0);
-        if ((pool[i] >= 105) || (player.player1_isphased[search_card_order(player.player1, pool[i], pool[i], 11)]) || (pool[i] == -1))
-            return -1;
-        player.player1_isphased[search_card_order(player.player1, pool[i], pool[i], 11)] = true;
-        if ((pool[i] <= 96) && (pool[i] % 2 != 0))
-            pool[i]++;
-    }
-
-    cout<<"Checking the validity of the cards...\nPlease wait...";
-    int copyset_num = check_set(pool, 3);
-    if (copyset_num > 0)
-    {
-        cout<<"Correct! Enter the next set of 3.\n";
-        phase1[1].set_num = copyset_num;
-    }
-    else
-    {
-        cout<<"Wrong phase! Please reenter the whole phase!\n";
-        for (int i = 1; i <= 3; i++)
-            pool[i] = 0;
-        for (int i = 1; i <= 11; i++)
-            player.player1_isphased[i] = false;
-        return -1;
-    }
-
-    // part 2
-    for (int i = 1; i <= 3; i++)
-    {
-        cout<<"Card "<<i<<": ";
-        pool[i] = discard_card_p1(0);
-        if ((pool[i] >= 105) || (player.player1_isphased[search_card_order(player.player1, pool[i], pool[i], 11)]) || (pool[i] == -1))
-            return -1;
-        player.player1_isphased[search_card_order(player.player1, pool[i], pool[i], 11)] = true;
-        if ((pool[i] <= 96) && (pool[i] % 2 != 0))
-            pool[i]++;
-    }
-
-    cout<<"Checking the validity of the cards...\nPlease wait...";
-    copyset_num = check_set(pool, 3);
-    if (copyset_num > 0)
-    {
-        cout<<"Congratulations! You phase the card!\n";
-        phase1[2].set_num =copyset_num;
-    }
-    else
-    {
-        cout<<"Wrong phase! Please reenter the whole phase!\n";
-        for (int i = 1; i <= 3; i++)
-            pool[i] = 0;
-        for (int i = 1; i <= 11; i++)
-            player.player1_isphased[i] = false;
-        return -1;
-    }
-
-    // clear the cards
-    for (int i = 1; i <= 11; i++)
-    {
-        if (player.player1_isphased[i])
-            player.player1[i] = 0;
-        player.player1_isphased[i] = false; // reset phase status
-    }
-
-    system("sleep 2");
-    show_phase_1();
-    cout<<endl;
-
-    // reshow the cards
-    show_card_p1();
-
-    return 1;
-}
-
-int hit_phase_p1()
-{
-
-    int hit_seq = 0;
-    int hit = discard_card_p1(0);
-    if (hit == -1)
-        return -1;
-    if (hit <= 96)
-        hit_seq = ((hit - 1) % 24 / 2 + 1);
-    else if (hit >= 105)
-        hit_seq = 14;
-    else
-        hit_seq = 13;
-    int counter = search_phase(hit_seq);
-    if (counter == 0)
-    {
-        cout<<"Phase to hit not found! Please reenter:\n";
-        return -1;
-    }
-    else
-    {
-        player.player1[search_card_order(player.player1, hit, hit, 11)] = 0;
-        show_card_p1();
-        cout<<"Do you have other cards to hit? Enter \"yes(y)\" to confirm.\n";
-        string confirmer_hit = "";
-        while (confirmer_hit == "")
-            getline(cin, confirmer_hit);
-        if ((confirmer_hit == "y") || (confirmer_hit == "yes"))
-            return -1;
-        else return 0;
-    }
-}
-
-void round_p2()
-{
-    cout<<"Player2, enter your password: ";
-    getline(cin, player2_enter);
-
-    while (player2_enter != player.player2_word)
-    {
-        cout<<"Wrong password! Please reenter!\n";
-        getline(cin, player2_enter);
-    }
-
-    show_card_p2();
-    cout<<endl;
-
-    cout<<"The shown card is: ";
-    transfer(shown);
-    cout<<"And there is a random card which can't be shown.\n\n";
-
-    if (shown <= 104)
-    {
-        cout<<"Pick one, enter 1 for the shown card, 2 for the random one.\n";
-        cin>>confirmer;
-        pick_card_p2(confirmer);
-        if (confirmer == 2)
-            not_shown = card_out();
-    }
-    else
-    {
-        cout<<"You can't pick Skip Card.\nAutomatically take the random card instead.\n";
-        pick_card_p2(2);
-        not_shown = card_out();
-    }
-
-    // phase
-    if (player.player2_phase != 1)
-    {
-        system("sleep 1");
-        system("clear");
-        show_card_p2();
-        cout<<"Do you have a phase? Enter \"yes(y)\" to confirm.\n";
-        string confirmer_phase = "";
-        while (confirmer_phase == "")
-            getline(cin, confirmer_phase);
-        if ((confirmer_phase == "y") || (confirmer_phase == "yes"))
-        {
-            player.player2_phase = phase_1_p2();
-            while (player.player2_phase == -1)
-                player.player2_phase = phase_1_p2();
-        }
-    }
-
-    // hit
-    if (player.player2_phase == 1)
-    {
-        system("sleep 1");
-        system("clear");
-        show_card_p2();
-        cout<<"You have phased! Do you have cards to hit the phases?\nEnter \"yes(y)\" to confirm.\n";
-        cout<<"By the way, the phases on the desk are:\n";
-        show_phase_1();
-        cout<<endl;
-        string confirmer_hit = "";
-        while (confirmer_hit == "")
-            getline(cin, confirmer_hit);
-        if ((confirmer_hit == "y") || (confirmer_hit == "yes"))
-        {
-            cout<<"Enter the card you want to hit: ";
-            int copyhit = hit_phase_p2();
-            while (copyhit == -1)
-                copyhit = hit_phase_p2();
-        }
-    }
-
-    // discard
-    system("sleep 1");
-    system("clear");
-    show_card_p2();
-    cout<<"Enter a card you want to discard: ";
-    int copyshown = discard_card_p2(1);
-    while (copyshown == -1)
-        copyshown = discard_card_p2(1);
-    shown = copyshown;
-    system("sleep 2");
-
-    return;
-}
-
-void show_card_p2()
-{
-    system("clear");
-    cout<<"You own:\n";
-    sort(player.player2 + 1, player.player2 + 11 + 1, cmp);
-    for (int i = 1; i <= 11; i++)
-        if (player.player2[i] != 0)
-        {
-            transfer(player.player2[i]);
-            cout<<"Card No."<<player.player2[i]<<"\n\n";
-        }
-    return;
-}
-
-void pick_card_p2(int choice)
-{
-    if (choice == 1)
-    {
-        player.player2[1] = shown;
-        show_card_p2();
-    }
-    else if (choice == 2)
-    {
-        cout<<"You get a ";
-        transfer(not_shown);
-        system("sleep 2");
-        player.player2[1] = not_shown;
-        show_card_p2();
-    }
-    return;
-}
-
-int discard_card_p2(bool discard_module)
-{
-    string p2_enter = "";
-    int card_number = 0;
-    int card_order = 0;
-
-    if ((get_number(p2_enter) == -1) && (p2_enter != ""))
-        return -1;
-
-    while (p2_enter == "")
-        getline(cin, p2_enter);
-    int card_range = 0;
-    card_range = get_number(p2_enter);
-
-    if ((card_range > 0) && (card_range <= 96))
-    {
-        card_number = search_card_number(player.player2, card_range - 1, card_range, 11);
-        card_order = search_card_order(player.player2, card_range - 1, card_range, 11);
-        if (card_number != 0)
-        {
-            if (discard_module)
-            {
-                cout<<"You discard a ";
-                transfer(card_number);
-                player.player2[card_order] = 0;
-                system("sleep 2.0");
-                show_card_p2();
-            }
-            return card_number;
-        }
-        else
-        {
-            cout<<"You don't have a ";
-            transfer(card_range);
-            cout<<"Please reenter: ";
-            return -1;
-        }
-    }
-    else if ((card_range >= 97) && (card_range <= 104))
-    {
-        card_number = search_card_number(player.player2, card_range, card_range + 7, 11);
-        card_order = search_card_order(player.player2, card_range, card_range + 7, 11);
-        if (card_number != 0)
-        {
-            if (discard_module)
-            {
-                cout<<"You discard a ";
-                transfer(card_number);
-                player.player2[card_order] = 0;
-                system("sleep 2.0");
-                show_card_p2();
-            }
-            return card_number;
-        }
-        else
-        {
-            cout<<"You don't have a ";
-            transfer(card_range);
-            cout<<"Please reenter: ";
-            return -1;
-        }
-    }
-    else if ((card_range >= 105) && (card_range <= 108))
-    {
-        card_number = search_card_number(player.player2, card_range, card_range + 3, 11);
-        card_order = search_card_order(player.player2, card_range, card_range + 3, 11);
-        if (card_number != 0)
-        {
-            if (discard_module)
-            {
-                cout<<"You discard a ";
-                transfer(card_number);
-                player.player2[card_order] = 0;
-                system("sleep 2.0");
-                show_card_p2();
-            }
-            return card_number;
-        }
-        else
-        {
-            cout<<"You don't have a ";
-            transfer(card_range);
-            cout<<"Please reenter: ";
-            return -1;
-        }
-    }
-    else
-        return -1;
-}
-
-int phase_1_p2()
-{
-    int pool[4] = {};
-
-    for (int i = 1; i <= 11; i++)
-        player.player2_isphased[i] = false;
-
-    for (int i = 1; i <= 4; i++)
-    {
-        phase1[i].isset = true;
-        phase1[i].isrun = false;
-    }
-
-    cout<<"\nPhase 1: 2 sets of 3.\nEnter the first set of 3.\n";
-    // part 1
-    for (int i = 1; i <= 3; i++)
-    {
-        cout<<"Card "<<i<<": ";
-        pool[i] = discard_card_p2(0);
-        if ((pool[i] >= 105) || (player.player2_isphased[search_card_order(player.player2, pool[i], pool[i], 11)]) || (pool[i] == -1))
-            return -1;
-        player.player2_isphased[search_card_order(player.player2, pool[i], pool[i], 11)] = true;
-        if ((pool[i] <= 96) && (pool[i] % 2 != 0))
-            pool[i]++;
-    }
-
-    cout<<"Checking the validity of the cards...\nPlease wait...";
-    int copyset_num = check_set(pool, 3);
-    if (copyset_num > 0)
-    {
-        cout<<"Correct! Enter the next set of 3.\n";
-        phase1[3].set_num = copyset_num;
-    }
-    else
-    {
-        cout<<"Wrong phase! Please reenter the whole phase!\n";
-        for (int i = 1; i <= 3; i++)
-            pool[i] = 0;
-        for (int i = 1; i <= 11; i++)
-            player.player2_isphased[i] = false;
-        return -1;
-    }
-
-    // part 2
-    for (int i = 1; i <= 3; i++)
-    {
-        cout<<"Card "<<i<<": ";
-        pool[i] = discard_card_p2(0);
-        if ((pool[i] >= 105) || (player.player2_isphased[search_card_order(player.player2, pool[i], pool[i], 11)]) || (pool[i] == -1))
-            return -1;
-        player.player2_isphased[search_card_order(player.player2, pool[i], pool[i], 11)] = true;
-        if ((pool[i] <= 96) && (pool[i] % 2 != 0))
-            pool[i]++;
-    }
-
-    cout<<"Checking the validity of the cards...\nPlease wait...";
-    copyset_num = check_set(pool, 3);
-    if (copyset_num > 0)
-    {
-        cout<<"Congratulations! You phase the card!\n";
-        phase1[4].set_num =copyset_num;
-    }
-    else
-    {
-        cout<<"Wrong phase! Please reenter the whole phase!\n";
-        for (int i = 1; i <= 3; i++)
-            pool[i] = 0;
-        for (int i = 1; i <= 11; i++)
-            player.player2_isphased[i] = false;
-        return -1;
-    }
-
-    // clear the cards
-    for (int i = 1; i <= 11; i++)
-    {
-        if (player.player2_isphased[i])
-            player.player2[i] = 0;
-        player.player2_isphased[i] = false; // reset phase status
-    }
-
-    system("sleep 2");
-    show_phase_1();
-    cout<<endl;
-
-    // reshow the cards
-    show_card_p2();
-
-    return 1;
-}
-
-int hit_phase_p2()
-{
-
-    int hit_seq = 0;
-    int hit = discard_card_p2(0);
-    if (hit == -1)
-        return -1;
-    if (hit <= 96)
-        hit_seq = ((hit - 1) % 24 / 2 + 1);
-    else if (hit >= 105)
-        hit_seq = 14;
-    else
-        hit_seq = 13;
-    int counter = search_phase(hit_seq);
-    if (counter == 0)
-    {
-        cout<<"Phase to hit not found! Please reenter:\n";
-        return -1;
-    }
-    else
-    {
-        player.player2[search_card_order(player.player2, hit, hit, 11)] = 0;
-        show_card_p2();
-        cout<<"Do you have other cards to hit? Enter \"yes(y)\" to confirm.\n";
-        string confirmer_hit = "";
-        while (confirmer_hit == "")
-            getline(cin, confirmer_hit);
-        if ((confirmer_hit == "y") || (confirmer_hit == "yes"))
-            return -1;
-        else return 0;
-    }
 }
