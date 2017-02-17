@@ -138,7 +138,13 @@ void play_game()
             player[player_number].isskipped_lastround = true;
         }
         player_number = player_number % total_player + 1;
-        cout<<"Get ready for your opponent's round.\n";
+        // user message control
+        if (total_player == 2)
+            cout<<"Get ready for your opponent's round.\n";
+        if (total_player > 2)
+            cout<<"Get ready for your opponents' round.\n";
+        else
+            cout<<"Play yourself happily!\n";
         system("sleep 2");
         system("clear");
     }
@@ -274,8 +280,33 @@ void round(int player_number)
         if ((confirmer_phase == "y") || (confirmer_phase == "yes"))
         {
             player[player_number].player_phase = phase_1(player_number);
+            int counter_phase = 1;
+            confirmer_phase = "";
             while (player[player_number].player_phase == -1)
+            {
                 player[player_number].player_phase = phase_1(player_number);
+                counter_phase++;
+                if (counter_phase == 3)
+                {
+                    cout<<"\nYou have entered the wrong card 3 times.Are you sure you have the right card?\nEnter \"yes(y)\" to confirm.\n";
+                    while (confirmer_phase == "")
+                        getline(cin, confirmer_phase);
+                    if ((confirmer_phase == "y") || (confirmer_phase == "yes"))
+                    {
+                        cout<<"Please reenter: ";
+                        continue;
+                    }
+                    else
+                        break;
+                }
+                if (counter_phase == 4)
+                    cout<<"\nYou have only one chance to enter!\nPlease reenter: ";
+                if (counter_phase == 5)
+                {
+                    cout<<"\nSorry, force break!\n";
+                    break;
+                }
+            }
         }
     }
 
@@ -294,10 +325,36 @@ void round(int player_number)
             getline(cin, confirmer_hit);
         if ((confirmer_hit == "y") || (confirmer_hit == "yes"))
         {
+            int counter_hit = 1;
+            confirmer_hit = "";
             cout<<"Enter the card you want to hit: ";
             int copyhit = hit_phase(player_number);
-            while (copyhit == -1)
+            while (copyhit < 0)
+            {
                 copyhit = hit_phase(player_number);
+                if (copyhit == -1)
+                    counter_hit++;
+                if (counter_hit == 3)
+                {
+                    cout<<"\nYou have entered the wrong card 3 times.Are you sure you have the right card?\nEnter \"yes(y)\" to confirm.\n";
+                    while (confirmer_hit == "")
+                        getline(cin, confirmer_hit);
+                    if ((confirmer_hit == "y") || (confirmer_hit == "yes"))
+                    {
+                        cout<<"Please reenter: ";
+                        continue;
+                    }
+                    else
+                        break;
+                }
+                if (counter_hit == 4)
+                    cout<<"\nYou have only one chance to enter!\nPlease reenter: ";
+                if (counter_hit == 5)
+                {
+                    cout<<"\nSorry, force break!\n";
+                    break;
+                }
+            }
         }
     }
 
@@ -330,7 +387,7 @@ void round(int player_number)
     else if ((shown >= 105) && (total_player == 2) && (player[player_number % 2 + 1].isskipped_lastround))
         cout<<"This skip card won't take effect.\n";
 
-    if (total_player == 1)
+    if ((total_player == 1) && (shown >= 105))
         cout<<"Skip card won't help! Play around yourself!\n";
 
     system("sleep 2");
@@ -798,7 +855,7 @@ int hit_phase(int player_number)
     int counter = search_phase(hit_seq);
     if (counter == 0)
     {
-        cout<<"Phase to hit not found! Please reenter:\n";
+        cout<<"Phase to hit not found! Please reenter: ";
         return -1;
     }
     else
@@ -812,7 +869,7 @@ int hit_phase(int player_number)
         if ((confirmer_hit == "y") || (confirmer_hit == "yes"))
         {
             cout<<"Please enter the card you want to hit: ";
-            return -1;
+            return -2;
         }
 
         else return 0;
