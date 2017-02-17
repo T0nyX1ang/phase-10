@@ -8,16 +8,19 @@ bool isout[109] = {};
 int shown = 0;
 int not_shown = 0;
 int total_player = 0;
+const int card_number = 108;
 
 // structures
 
 struct player_data
 {
     bool isskipped;
+    bool isskipped_lastround;
     int player_card[13];
     bool player_isphased[13];
     int player_score;
     int player_phase;
+    int player_current;
     string player_word;
     string player_password;
     string player_enter;
@@ -36,14 +39,15 @@ struct phase_data
 
 phase_data phase1[21];
 
-
 // functions
+
+void play_game();
 
 void initialize(int total_player);
 
 int card_out();
 
-bool isnotclear();
+bool isclear(int player_number);
 
 void round(int player_number);
 
@@ -75,12 +79,27 @@ int hit_phase(int player_number);
 
 int search_phase(int num);
 
-int calculate_score(int *arr, int total);
+void calculate_score(int player_number);
+
+void show_score();
 
 int main()
 {
+    play_game();
+    return 0;
+}
+
+void play_game()
+{
+    system("clear");
     cout<<"Enter the players: ";
-    cin>>total_player;
+    while (!(cin>>total_player) || (total_player <= 0) || (total_player > 10))
+    {
+        cin.clear();
+        while (cin.get() != '\n')
+            continue;
+        cout<<"Wrong syntax! Please reenter: ";
+    }
     cin.get();
     initialize(total_player);
 
@@ -98,39 +117,42 @@ int main()
     shown = start_card;
     not_shown = random_card;
 
-    while (isnotclear())
+    int player_number = start_from;
+    if (start_card >= 105)
+        player[player_number].isskipped = true;
+
+    while (1)
     {
-        if (!player[start_from].isskipped)
+        if (!player[player_number].isskipped)
         {
-            round((start_from - 1) % total_player + 1);
+            round(player_number);
+            player[player_number].isskipped_lastround = false;
+            player[player_number].isskipped = false;
+            if (isclear(player_number))
+                break;
         }
         else
         {
-            cout<<"You are skipped this round.\n";
-            player[start_from].isskipped = false;
+            cout<<"Player "<<player_number<<", you are skipped this round.\n";
+            player[player_number].isskipped = false;
+            player[player_number].isskipped_lastround = true;
         }
-        start_from++;
+        player_number = player_number % total_player + 1;
         cout<<"Get ready for your opponent's round.\n";
         system("sleep 2");
         system("clear");
     }
 
-    /*
-    // calculate scores
-    if (isclear(player.player1, 1, 11))
-        player.player2_score += calculate_score(player.player2, 11);
-    else
-        player.player1_score += calculate_score(player.player2, 11);
 
+    // calculate scores
+    for (int i = 1; i <= total_player; i++)
+        calculate_score(i);
     // show scores
     system("clear");
     cout<<"Hand complete!\nThe scores now:\n";
-    cout<<"Player1 "<<player.player1_score<<endl;
-    cout<<"Player2 "<<player.player2_score<<endl;
-    system("sleep 1");
-    cout<<"Get ready for next hand.\n";*/
+    show_score();
 
-    return 0;
+    cout<<"Get ready for next hand.\n";
 }
 
 void initialize(int total_player)
@@ -155,11 +177,17 @@ void initialize(int total_player)
 
     // initialize player phase status
     for (int i = 1; i <= 10; i++)
+    {
         player[i].player_phase = 0;
+        player[i].player_current = 1;
+    }
 
     // initialize skip status
     for (int i = 1; i <= 10; i++)
+    {
         player[i].isskipped = false;
+        player[i].isskipped_lastround = false;
+    }
 
     // enter password
     for (int i = 1; i <= total_player; i++)
@@ -174,7 +202,6 @@ void initialize(int total_player)
 
 int card_out()
 {
-    int card_number = 108;
     srand(time(0));
     int start_card = rand() % card_number + 1;
     if (isout[start_card])
@@ -184,29 +211,19 @@ int card_out()
     return start_card;
 }
 
-bool isnotclear()
+bool isclear(int player_number)
 {
     bool check = false;
-    for (int i = 1; i <= 10; i++)
-    {
-        for (int j = 1; j <= 11; j++)
-            if (player[i].player_card[j] != 0)
-            {
-                check = false;
-                continue;
-            }
-            else
-                check = true;
-        if (check)
-            return true;
-    }
-    return false;
+    for (int j = 1; j <= 11; j++)
+        if (player[player_number].player_card[j] != 0)
+            return false;
+    return true;
 }
 
 void round(int player_number)
 {
-    //cout<<player_number<<endl<<endl;
-    cout<<"Player"<<player_number<<", enter your password: ";
+    cin.clear();
+    cout<<"Player "<<player_number<<", enter your password: ";
     getline(cin, player[player_number].player_enter);
 
     while (player[player_number].player_enter != player[player_number].player_password)
@@ -284,6 +301,10 @@ void round(int player_number)
         }
     }
 
+    // prejudge if a hand ends
+    if (isclear(player_number))
+        return; // return when ends...
+
     // discard
     system("sleep 1");
     system("clear");
@@ -301,9 +322,16 @@ void round(int player_number)
         while (choice == -1)
             choice = skip_person(player_number);
         player[choice].isskipped = true;
+        cin.get();
     }
-    else if ((total_player == 2) && (player[player_number % 2 + 1].isskipped))
+
+    if ((shown >= 105) && (total_player == 2) && (!player[player_number % 2 + 1].isskipped) && (!player[player_number % 2 + 1].isskipped_lastround))
         player[player_number % 2 + 1].isskipped = true;
+    else if ((shown >= 105) && (total_player == 2) && (player[player_number % 2 + 1].isskipped_lastround))
+        cout<<"This skip card won't take effect.\n";
+
+    if (total_player == 1)
+        cout<<"Skip card won't help! Play around yourself!\n";
 
     system("sleep 2");
 
@@ -331,9 +359,14 @@ int skip_person(int player_number)
         cout<<"Don't be ridiculous! You can't skip yourself! Please reenter: ";
         return -1;
     }
-    else if (player[choice].isskipped)
+    else if (player[choice].isskipped_lastround)
     {
         cout<<"You can't skip whoever is skipped the last round! Please reenter: ";
+        return -1;
+    }
+    else if (player[choice].isskipped)
+    {
+        cout<<"You can't skip whoever is skipped now! Please reenter: ";
         return -1;
     }
     else
@@ -349,7 +382,8 @@ void show_card(int player_number)
         if (player[player_number].player_card[i] != 0)
         {
             transfer(player[player_number].player_card[i]);
-            cout<<"Card No."<<player[player_number].player_card[i]<<"\n\n";
+            cout<<endl;
+            // cout<<"Card No."<<player[player_number].player_card[i]<<"\n\n";
         }
     return;
 }
@@ -468,6 +502,8 @@ int phase_1(int player_number)
     {
         cout<<"Congratulations! You phase the card!\n";
         phase1[2 * player_number].set_num =copyset_num;
+        // update current phase number
+        player[player_number].player_current++;
     }
     else
     {
@@ -797,4 +833,45 @@ int search_phase(int num)
         //cout<<counter<<endl;
     }
     return counter;
+}
+
+void calculate_score(int player_number)
+{
+    for (int i = 1; i <= 11; i++)
+    {
+        if ((player[player_number].player_card[i] <= 96) && (player[player_number].player_card[i] > 0))
+        {
+            if ((player[player_number].player_card[i] - 1) % 24 / 2 + 1 <= 9)
+                player[player_number].player_score += 5;
+            else
+                player[player_number].player_score += 10;
+        }
+        else if (player[player_number].player_card[i] >= 105)
+            player[player_number].player_score += 15;
+        else if ((player[player_number].player_card[i] >= 97) && (player[player_number].player_card[i] <= 104))
+            player[player_number].player_score += 25;
+    }
+}
+
+void show_score()
+{
+    int max_phase = 0;
+    int min_score = 100000000;
+    int winner_player_current = 0;
+    // rank
+    for (int i = 1; i <= total_player; i++)
+    {
+        if ((player[i].player_current >= max_phase) && (player[i].player_score < min_score))
+        {
+            max_phase = player[i].player_current;
+            min_score = player[i].player_score;
+            winner_player_current = i;
+        }
+    }
+    cout<<"Current winner: Player "<<winner_player_current<<endl<<"Statistics:\n";
+    for (int i = 1; i <= total_player; i++)
+        if (i == winner_player_current)
+            cout<<"[+]Player "<<i<<": Phase "<<player[i].player_current<<", Score "<<player[i].player_score<<endl;
+        else
+            cout<<"[-]Player "<<i<<": Phase "<<player[i].player_current<<", Score "<<player[i].player_score<<endl;
 }
