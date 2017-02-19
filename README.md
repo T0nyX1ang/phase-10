@@ -2,10 +2,15 @@
 a card game
 
 ## notice
-It's just a very raw version which hasn't finished. You can just play 1 phase and with less than 10 person on 1 computer!!!
+It's a very raw but fully finished version now. You can play 10 phases and with less than 10 person on 1 computer.
 And it doesn't have a GUI version now.
 </br>More version will come soon!
 </br>Linux-version only!
+
+## version 0.1.0 updates
+- finish writing the full phases
+- finish writing the codes about the same color
+- fix some bugs
 
 ## version 0.0.6 updates
 - add phase 10 round 2 in this version
@@ -37,7 +42,8 @@ And it doesn't have a GUI version now.
 - can be played by two person
 
 ## will be updated later
-- phase 10 - round 3 - 7
-- speed up the procedure(long term)
-- get better for set, run and color phase in one ultimate (or 3) function(s)
+- speed up the procedure (long term)
+- get better for set, run and color phase in one ultimate (or 3) function(s) and shorten the codes length
+- adjust some of the orders to make it better for people to use
+- design a GUI when available (long term)
 - other exceptions
