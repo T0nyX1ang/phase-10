@@ -8,7 +8,8 @@ int shown = 0;
 int not_shown = 0;
 int total_player = 0;
 const int card_number = 108;
-const int winning_phase = 2;
+const int winning_phase = 10;
+const int start_phase = 1;
 
 // structures
 
@@ -36,6 +37,7 @@ struct phase_data
     int run_start;
     int run_stop;
     bool issamecolor;
+    int color_code;
 };
 
 phase_data phase[21];
@@ -78,9 +80,13 @@ int enter_set(int set_volume, int player_number, int return_value);
 
 int enter_run(int run_volume, int player_number, int return_value);
 
+int enter_samecolor(int samecolor_volume, int player_number, int return_value);
+
 int check_set(int *arr, int total);
 
 int check_run(int *arr, int total);
+
+int check_samecolor(int *arr, int total);
 
 void show_phase();
 
@@ -169,7 +175,7 @@ void play_game()
             cout<<"Hand complete!\nThe scores now:\n";
             show_score();
             cout<<"Get ready for next hand.\n";
-            system("sleep 2");
+            system("sleep 5");
         }
         else
         {
@@ -179,6 +185,7 @@ void play_game()
             break;
         }
         initialize(total_player, 0);
+        cin.get();
     }
 }
 
@@ -228,6 +235,7 @@ void initialize(int total_player, bool initialize_module)
         phase[i].run_start = 0;
         phase[i].run_stop = 0;
         phase[i].set_num = 0;
+        phase[i].color_code = 0;
     }
 
     // initialize player phase status
@@ -238,7 +246,7 @@ void initialize(int total_player, bool initialize_module)
     {
         // initialize player phase status
         for (int i = 1; i <= 10; i++)
-            player[i].player_current = 1;
+            player[i].player_current = start_phase;
 
         // enter password
         for (int i = 1; i <= total_player; i++)
@@ -568,6 +576,8 @@ int phase_card(int player_number, int phase_number)
             {
                 phase[i].isset = true;
                 phase[i].isrun = false;
+                phase[i].issamecolor = false;
+                phase[i].issamecolor = false;
             }
             cout<<"\nPhase 1: 2 sets of 3.\nEnter the first set of 3.\n";
             // part 1
@@ -594,6 +604,8 @@ int phase_card(int player_number, int phase_number)
                 phase[2 * i - 1].isrun = false;
                 phase[2 * i].isset = false;
                 phase[2 * i].isrun = true;
+                phase[2 * i - 1].issamecolor = false;
+                phase[2 * i].issamecolor = false;
             }
             cout<<"\nPhase 2: 1 set of 3 & 1 run of 4.\nEnter a set of 3.\n";
             // part 1
@@ -604,6 +616,194 @@ int phase_card(int player_number, int phase_number)
             // part 2
             phase2 = enter_run(4, player_number, 2 * player_number);
             if (phase2 == -1)
+            {
+                cout<<"Please reenter the whole phase!\n";
+                return -1;
+            }
+            cout<<"Congratulations! You phase the card!\n";
+            player[player_number].player_current++;
+        }
+        break;
+        case 3:
+        {
+            for (int i = 1; i <= total_player; i++)
+            {
+                phase[2 * i - 1].isset = true;
+                phase[2 * i - 1].isrun = false;
+                phase[2 * i].isset = false;
+                phase[2 * i].isrun = true;
+                phase[2 * i].issamecolor = false;
+                phase[2 * i - 1].issamecolor = false;
+            }
+            cout<<"\nPhase 3: 1 set of 4 & 1 run of 4.\nEnter a set of 4.\n";
+            // part 1
+            int phase3 = enter_set(4, player_number, 2 * player_number - 1);
+            if (phase3 == -1)
+                return -1;
+            cout<<"Correct! Enter a run of 4.\n";
+            // part 2
+            phase3 = enter_run(4, player_number, 2 * player_number);
+            if (phase3 == -1)
+            {
+                cout<<"Please reenter the whole phase!\n";
+                return -1;
+            }
+            cout<<"Congratulations! You phase the card!\n";
+            player[player_number].player_current++;
+        }
+        break;
+        case 4:
+        {
+            for (int i = 1; i <= total_player; i++)
+            {
+                phase[2 * i - 1].isset = false;
+                phase[2 * i - 1].isrun = false;
+                phase[2 * i].isset = false;
+                phase[2 * i].isrun = true;
+                phase[2 * i - 1].issamecolor = false;
+                phase[2 * i].issamecolor = false;
+            }
+            cout<<"\nPhase 4: 1 run of 7.\nEnter a run of 7.\n";
+            // part 1
+            int phase4 = enter_run(7, player_number, 2 * player_number);
+            if (phase4 == -1)
+            {
+                cout<<"Please reenter the whole phase!\n";
+                return -1;
+            }
+            cout<<"Congratulations! You phase the card!\n";
+            player[player_number].player_current++;
+        }
+        break;
+        case 5:
+        {
+            for (int i = 1; i <= total_player; i++)
+            {
+                phase[2 * i - 1].isset = false;
+                phase[2 * i - 1].isrun = false;
+                phase[2 * i].isset = false;
+                phase[2 * i].isrun = true;
+                phase[2 * i - 1].issamecolor = false;
+                phase[2 * i].issamecolor = false;
+            }
+            cout<<"\nPhase 5: 1 run of 8.\nEnter a run of 8.\n";
+            // part 1
+            int phase5 = enter_run(8, player_number, 2 * player_number);
+            if (phase5 == -1)
+            {
+                cout<<"Please reenter the whole phase!\n";
+                return -1;
+            }
+            cout<<"Congratulations! You phase the card!\n";
+            player[player_number].player_current++;
+        }
+        break;
+        case 6:
+        {
+            for (int i = 1; i <= total_player; i++)
+            {
+                phase[2 * i - 1].isset = false;
+                phase[2 * i - 1].isrun = false;
+                phase[2 * i].isset = false;
+                phase[2 * i].isrun = true;
+                phase[2 * i - 1].issamecolor = false;
+                phase[2 * i].issamecolor = false;
+            }
+            cout<<"\nPhase 6: 1 run of 9.\nEnter a run of 9.\n";
+            // part 1
+            int phase6 = enter_run(9, player_number, 2 * player_number);
+            if (phase6 == -1)
+            {
+                cout<<"Please reenter the whole phase!\n";
+                return -1;
+            }
+            cout<<"Congratulations! You phase the card!\n";
+            player[player_number].player_current++;
+        }
+        break;
+        case 7:
+        {
+            for (int i = 1; i <= 2 * total_player; i++)
+            {
+                phase[i].isset = true;
+                phase[i].isrun = false;
+                phase[i].issamecolor = false;
+            }
+            cout<<"\nPhase 7: 2 sets of 4.\nEnter the first set of 4.\n";
+            // part 1
+            int phase7 = enter_set(4, player_number, 2 * player_number - 1);
+            if (phase7 == -1)
+                return -1;
+            cout<<"Correct! Enter the next set of 4.\n";
+            // part 2
+            phase7 = enter_set(4, player_number, 2 * player_number);
+            if (phase7 == -1)
+            {
+                cout<<"Please reenter the whole phase!\n";
+                return -1;
+            }
+            cout<<"Congratulations! You phase the card!\n";
+            player[player_number].player_current++;
+        }
+        break;
+        case 8:
+        {
+            for (int i = 1; i <= 2 * total_player; i++)
+            {
+                phase[i].isset = false;
+                phase[i].isrun = false;
+                phase[i].issamecolor = true;
+            }
+            cout<<"\nPhase 8: 7 cards of one color.\nEnter the cards.\n";
+            int phase8 = enter_samecolor(7, player_number, 2 * player_number);
+            if (phase8 == -1)
+                return -1;
+            cout<<"Congratulations! You phase the card!\n";
+            player[player_number].player_current++;
+        }
+        break;
+        case 9:
+        {
+            for (int i = 1; i <= 2 * total_player; i++)
+            {
+                phase[i].isset = true;
+                phase[i].isrun = false;
+                phase[i].issamecolor = false;
+            }
+            cout<<"\nPhase 9: A set of 5 & a set of 2.\nEnter the first set of 5.\n";
+            // part 1
+            int phase9 = enter_set(5, player_number, 2 * player_number - 1);
+            if (phase9 == -1)
+                return -1;
+            cout<<"Correct! Enter the next set of 2.\n";
+            // part 2
+            phase9 = enter_set(2, player_number, 2 * player_number);
+            if (phase9 == -1)
+            {
+                cout<<"Please reenter the whole phase!\n";
+                return -1;
+            }
+            cout<<"Congratulations! You phase the card!\n";
+            player[player_number].player_current++;
+        }
+        break;
+        case 10:
+        {
+            for (int i = 1; i <= 2 * total_player; i++)
+            {
+                phase[i].isset = true;
+                phase[i].isrun = false;
+                phase[i].issamecolor = false;
+            }
+            cout<<"\nPhase 10: A set of 5 & a set of 3.\nEnter the first set of 5.\n";
+            // part 1
+            int phase10 = enter_set(5, player_number, 2 * player_number - 1);
+            if (phase10 == -1)
+                return -1;
+            cout<<"Correct! Enter the next set of 3.\n";
+            // part 2
+            phase10 = enter_set(3, player_number, 2 * player_number);
+            if (phase10 == -1)
             {
                 cout<<"Please reenter the whole phase!\n";
                 return -1;
@@ -673,12 +873,39 @@ int enter_run(int run_volume, int player_number, int return_value)
             pool[i]++;
     }
     cout<<"Checking the validity of the cards...\nPlease wait...\n";
-    int copyset_num = check_run(pool, run_volume);
-    if (copyset_num > 0)
+    int copyrun_num = check_run(pool, run_volume);
+    if (copyrun_num > 0)
     {
-        phase[return_value].run_start = copyset_num;
-        phase[return_value].run_stop = copyset_num + run_volume - 1;
+        phase[return_value].run_start = copyrun_num;
+        phase[return_value].run_stop = copyrun_num + run_volume - 1;
     }
+    else
+    {
+        //cout<<"Wrong phase! Please reenter the whole phase!\n";
+        for (int i = 1; i <= 13; i++)
+            pool[i] = 0;
+        for (int i = 1; i <= 11; i++)
+            player[player_number].player_isphased[i] = false;
+        return -1;
+    }
+    return 0;
+}
+
+int enter_samecolor(int samecolor_volume, int player_number, int return_value)
+{
+    int pool[13] = {};
+    for (int i = 1; i <= samecolor_volume; i++)
+    {
+        cout<<"Card "<<i<<": ";
+        pool[i] = discard_card(0, player_number);
+        if ((pool[i] >= 105) || (player[player_number].player_isphased[search_card_order(pool[i], pool[i], 11, player_number)]) || (pool[i] == -1))
+            return -1;
+        player[player_number].player_isphased[search_card_order(pool[i], pool[i], 11, player_number)] = true;
+    }
+    cout<<"Checking the validity of the cards...\nPlease wait...\n";
+    int copysamecolor_num = check_samecolor(pool, samecolor_volume);
+    if (copysamecolor_num > 0)
+        phase[player_number].color_code = copysamecolor_num;
     else
     {
         //cout<<"Wrong phase! Please reenter the whole phase!\n";
@@ -961,6 +1188,31 @@ int check_run(int *arr, int total)
     return start_number;
 }
 
+int check_samecolor(int *arr, int total)
+{
+    // deal with raw data
+    for (int i = 1; i <= total; i++)
+        if ((*(arr + i) >= 97) && (*(arr + i) <= 104))
+            *(arr + i) = 13;
+        else
+            *(arr + i) = (*(arr + i) - 1) / 24 + 1;
+    // check if it's all wild cards & find where the first normal card is...
+    int counter = 1;
+    for (counter = 1; counter <= total; counter++)
+        if (*(arr + counter) != 13)
+            break;
+        else if (counter == total)
+        {
+            cout<<"You must at least drop a NORMAL CARD!\n";
+            return 0;
+        }
+    // check if it's same color...
+    for (int i = 1; i <= total; i++)
+        if ((*(arr + i) != *(arr + counter)) && (*(arr + i) != 13))
+            return 0;
+    return *(arr + counter);
+}
+
 void show_phase()
 {
     for (int i = 1; i <= 2 * total_player; i++)
@@ -968,6 +1220,22 @@ void show_phase()
             cout<<"A set of "<<phase[i].set_num<<endl;
         else if ((phase[i].run_start != 0) && (phase[i].run_stop != 0))
             cout<<"A run from "<<phase[i].run_start<<" to "<<phase[i].run_stop<<endl;
+        else if (phase[i].color_code != 0)
+            switch (phase[i].color_code)
+            {
+                case 1:
+                    cout<<"7 red cards\n";
+                break;
+                case 2:
+                    cout<<"7 yellow cards\n";
+                break;
+                case 3:
+                    cout<<"7 blue cards\n";
+                break;
+                case 4:
+                    cout<<"7 green cards\n";
+                break;
+            }
     return;
 }
 
@@ -981,7 +1249,7 @@ int hit_phase(int player_number)
         hit_seq = ((hit - 1) % 24 / 2 + 1);
     else if (hit >= 105)
     {
-        cout<<"You can't hit a Skip Card! Please reenter: ";
+        cout<<"You can't hit a Skip Card! Please reenter a card: ";
         return -1;
     }
     else
@@ -996,9 +1264,9 @@ int hit_phase(int player_number)
         }
     }
 
-    cout<<"If you want to hit a set, press 1.\nIf you want to hit a run, press 2.\nPlease enter: ";
+    cout<<"If you want to hit a set, press 1.\nIf you want to hit a run, press 2.\nIf you want hit a card with the same color, press 3.\nPlease enter: ";
     int confirmer = 0;
-    while ((!(cin>>confirmer)) || ((confirmer != 1) && (confirmer != 2)))
+    while ((!(cin>>confirmer)) || ((confirmer != 1) && (confirmer != 2) && (confirmer != 3)))
     {
         cin.clear();
         while (cin.get() != '\n')
@@ -1006,10 +1274,15 @@ int hit_phase(int player_number)
         cout<<"Wrong syntax! Please reenter: ";
     }
 
-    int copyhit_seq = search_phase(hit_seq, confirmer);
+    int copyhit_seq = 0;
+    if (confirmer != 3)
+        copyhit_seq = search_phase(hit_seq, confirmer);
+    else
+        copyhit_seq = search_phase(hit, confirmer);
+
     if (copyhit_seq == 0)
     {
-        cout<<"Phase to hit not found! Please reenter: ";
+        cout<<"Phase to hit not found! Please reenter a card: ";
         return -1;
     }
     else
@@ -1059,6 +1332,13 @@ int search_phase(int num, int phase_type)
                     return 1;
                 }
             }
+        return 0;
+    }
+    else if (phase_type == 3)
+    {
+        for (int i = 1; i <= 2 * total_player; i++)
+            if ((phase[i].issamecolor) && ((num > (phase[i].color_code - 1) * 24) && (num <= phase[i].color_code * 24)) || ((num >= 97) && (num <= 104)))
+                return 1;
         return 0;
     }
 }
