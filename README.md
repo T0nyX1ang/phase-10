@@ -2,10 +2,10 @@
 a card game
 
 ## notice
-It's a very raw but fully finished version now. You can play 10 phases and with less than 10 person on 1 computer.
+windows version finally comes!!!
+</br>It's a very raw but fully finished version now. You can play 10 phases and with less than 10 person on 1 computer.
 And it doesn't have a GUI version now.
 </br>More version will come soon!
-</br>Linux-version only!
 
 ## version 0.1.1 updates
 - fix a critical bug to make the game continue
