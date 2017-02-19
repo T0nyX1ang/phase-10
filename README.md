@@ -7,6 +7,10 @@ And it doesn't have a GUI version now.
 </br>More version will come soon!
 </br>Linux-version only!
 
+## version 0.1.1 updates
+- fix a critical bug to make the game continue
+- get the ui better
+
 ## version 0.1.0 updates
 - finish writing the full phases
 - finish writing the codes about the same color
