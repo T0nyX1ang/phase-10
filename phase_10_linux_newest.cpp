@@ -127,7 +127,6 @@ void play_game()
         int start_from = rand() % total_player + 1;
         int start_card = card_out();
         int random_card = card_out();
-        int discard_card = 0;
 
         // initial cards
         shown = start_card;
@@ -175,7 +174,7 @@ void play_game()
             cout<<"Hand complete!\nThe scores now:\n";
             show_score();
             cout<<"Get ready for next hand.\n";
-            system("sleep 5");
+            system("sleep 2");
         }
         else
         {
@@ -185,7 +184,7 @@ void play_game()
             break;
         }
         initialize(total_player, 0);
-        cin.get();
+        // cin.get();
     }
 }
 
@@ -200,6 +199,9 @@ bool isend()
 void initialize(int total_player, bool initialize_module)
 {
     system("clear");
+    // initialize cards status
+    for (int i = 1; i <= 108; i++)
+        isout[i] = false;
 
     // initialize player
     for (int i = 1; i <= 10; i++)
@@ -373,8 +375,6 @@ void round(int player_number)
         system("clear");
         show_card(player_number);
         cout<<"You have phased! Do you have cards to hit the phases?\nEnter \"yes(y)\" to confirm.\n";
-        cout<<"By the way, the phases on the desk are:\n";
-        show_phase();
         cout<<endl;
         string confirmer_hit = "";
         while (confirmer_hit == "")
@@ -498,7 +498,7 @@ int skip_person(int player_number)
 void show_card(int player_number)
 {
     system("clear");
-    cout<<"You own:\n";
+    cout<<"You own:\n\n";
     sort(player[player_number].player_card + 1, player[player_number].player_card + 11 + 1, cmp);
     for (int i = 1; i <= 11; i++)
         if (player[player_number].player_card[i] != 0)
@@ -507,6 +507,9 @@ void show_card(int player_number)
             cout<<endl;
             // cout<<"Card No."<<player[player_number].player_card[i]<<"\n\n";
         }
+    cout<<"The phases on the desk:\n";
+    show_phase();
+    cout<<endl;
     return;
 }
 
