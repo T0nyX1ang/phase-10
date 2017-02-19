@@ -3,8 +3,15 @@ a card game
 
 ## notice
 It's just a very raw version which hasn't finished. You can just play 1 phase and with less than 10 person on 1 computer!!!
+And it doesn't have a GUI version now.
 </br>More version will come soon!
 </br>Linux-version only!
+
+## version 0.0.6 updates
+- add phase 10 round 2 in this version
+- make set, run universal that don't need duplication
+- fix some bugs
+- rewrite and redesign some codes to change some of the orders in the program to display
 
 ## version 0.0.5 updates
 - fix loop display problem in phasing and hitting the card
@@ -30,7 +37,7 @@ It's just a very raw version which hasn't finished. You can just play 1 phase an
 - can be played by two person
 
 ## will be updated later
-- phase 10 - round 2
+- phase 10 - round 3 - 7
 - speed up the procedure(long term)
 - get better for set, run and color phase in one ultimate (or 3) function(s)
 - other exceptions
