@@ -2,11 +2,15 @@
 a card game
 
 ## notice
-windows version finally comes!!!
+windows version finally comes!!! windows version now is 0.1.1 and will be developed slower than the linux version.
 </br>It's a very raw but fully finished version now. You can play 10 phases and with less than 10 person on 1 computer.
 And it doesn't have a GUI version now.
 </br>More version will come soon!
 </br>You can find bugs freely now in your favorite version
+
+## version 0.1.2 updates
+- fix a bug which ocurrs in the card process
+- change the include header to make it compile more quickly
 
 ## version 0.1.1 updates
 - fix a critical bug to make the game continue
