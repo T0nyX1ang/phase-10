@@ -1,6 +1,9 @@
 # phase-10
 a card game
 
+## urgent notice
+I make a big mistake in my program. Please don't easily download it!!! 
+
 ## notice
 windows version finally comes!!! windows version now is 0.1.1 and will be developed slower than the linux version.
 </br>It's a very raw but fully finished version now. You can play 10 phases and with less than 10 person on 1 computer.
