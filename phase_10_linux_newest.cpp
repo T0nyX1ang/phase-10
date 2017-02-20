@@ -1,4 +1,7 @@
-#include<bits/stdc++.h>
+#include<iostream>
+#include<string>
+#include<algorithm>
+#include<stdlib.h>
 
 using namespace std;
 
@@ -581,6 +584,7 @@ int phase_card(int player_number, int phase_number)
                 phase[i].isrun = false;
                 phase[i].issamecolor = false;
                 phase[i].issamecolor = false;
+                phase[i].set_num = 0;
             }
             cout<<"\nPhase 1: 2 sets of 3.\nEnter the first set of 3.\n";
             // part 1
@@ -609,6 +613,9 @@ int phase_card(int player_number, int phase_number)
                 phase[2 * i].isrun = true;
                 phase[2 * i - 1].issamecolor = false;
                 phase[2 * i].issamecolor = false;
+                phase[2 * i - 1].set_num = 0;
+                phase[2 * i].run_start = 0;
+                phase[2 * i].run_start = 0;
             }
             cout<<"\nPhase 2: 1 set of 3 & 1 run of 4.\nEnter a set of 3.\n";
             // part 1
@@ -637,6 +644,9 @@ int phase_card(int player_number, int phase_number)
                 phase[2 * i].isrun = true;
                 phase[2 * i].issamecolor = false;
                 phase[2 * i - 1].issamecolor = false;
+                phase[2 * i - 1].set_num = 0;
+                phase[2 * i].run_start = 0;
+                phase[2 * i].run_start = 0;
             }
             cout<<"\nPhase 3: 1 set of 4 & 1 run of 4.\nEnter a set of 4.\n";
             // part 1
@@ -731,6 +741,7 @@ int phase_card(int player_number, int phase_number)
                 phase[i].isset = true;
                 phase[i].isrun = false;
                 phase[i].issamecolor = false;
+                phase[i].set_num = 0;
             }
             cout<<"\nPhase 7: 2 sets of 4.\nEnter the first set of 4.\n";
             // part 1
@@ -772,6 +783,7 @@ int phase_card(int player_number, int phase_number)
                 phase[i].isset = true;
                 phase[i].isrun = false;
                 phase[i].issamecolor = false;
+                phase[i].set_num = 0;
             }
             cout<<"\nPhase 9: A set of 5 & a set of 2.\nEnter the first set of 5.\n";
             // part 1
@@ -797,6 +809,7 @@ int phase_card(int player_number, int phase_number)
                 phase[i].isset = true;
                 phase[i].isrun = false;
                 phase[i].issamecolor = false;
+                phase[i].set_num = 0;
             }
             cout<<"\nPhase 10: A set of 5 & a set of 3.\nEnter the first set of 5.\n";
             // part 1
@@ -1239,6 +1252,7 @@ void show_phase()
                     cout<<"7 green cards\n";
                 break;
             }
+
     return;
 }
 
